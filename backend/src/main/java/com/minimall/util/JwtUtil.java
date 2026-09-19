@@ -21,7 +21,14 @@ public class JwtUtil {
 
     public JwtUtil(@Value("${jwt.secret}") String secret,
                    @Value("${jwt.expire-hours}") long expireHours) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("未配置 JWT 密钥：请设置环境变量 JWT_SECRET（至少 32 字节），不要将真实密钥提交到仓库");
+        }
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (keyBytes.length < 32) {
+            throw new IllegalStateException("JWT 密钥太短：HS256 至少需要 32 字节，请设置更长的 JWT_SECRET");
+        }
+        this.key = Keys.hmacShaKeyFor(keyBytes);
         this.expireMillis = expireHours * 3600_000L;
     }
 

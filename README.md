@@ -37,15 +37,23 @@ mini_mall/
 mysql -u root -p < backend/src/main/resources/sql/init.sql
 ```
 
-> 脚本会自动建库 `mini_mall`、8 张表，并写入默认管理员与示例商品。
+> 脚本会自动建库 `mini_mall`、8 张表，并写入示例商品。默认管理员改为后端首次启动时自动创建。
 
-### 2. 启动后端（:8080）
+### 2. 配置环境变量并启动后端（:8080）
+
+密钥与数据库口令不再提交到仓库，启动前需通过环境变量注入（参考 [backend/.env.example](backend/.env.example)）：
 
 ```bash
 cd backend
-# 需 JDK 17，且 application.yml 中数据库账号密码已改为本机实际值
+# Git Bash：
+export JWT_SECRET="$(openssl rand -base64 48)"   # JWT 密钥，至少 32 字节，务必随机生成
+export DB_USERNAME=root
+export DB_PASSWORD=123456                          # 你本机 MySQL 的实际密码
+export ADMIN_INIT_PASSWORD="你的管理员初始密码"     # 可选；留空则启动时生成随机密码并打印到日志
 mvn spring-boot:run
 ```
+
+> PowerShell 下用 `$env:JWT_SECRET="..."` 等语法，或在 IDE 运行配置里添加同名环境变量。
 
 ### 3. 启动前端（:5173）
 
@@ -63,7 +71,7 @@ npm run dev
 
 | 角色 | 用户名 | 密码 |
 |---|---|---|
-| 后台管理员 | `admin` | `admin123` |
+| 后台管理员 | `admin` | 首次启动自动创建：来自 `ADMIN_INIT_PASSWORD`，或自动生成并打印到后端日志 |
 | 前台用户 | 自行注册 | — |
 
 ## 文档

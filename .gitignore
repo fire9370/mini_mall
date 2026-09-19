@@ -9,6 +9,10 @@ frontend/dist/
 # 本地上传文件
 backend/uploads/
 
+# 本地环境变量（含密钥，不提交）
+.env
+jwt-secret.txt
+
 # Claude 本地配置（不应提交）
 .claude/settings.local.json
 

@@ -28,6 +28,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public R<Void> handleException(Exception e) {
         log.error("系统异常", e);
-        return R.error("系统异常：" + e.getMessage());
+        // 不向前端回显内部异常信息，避免泄露 SQL/路径/类名等细节
+        return R.error("系统繁忙，请稍后重试");
     }
 }

@@ -29,8 +29,8 @@ backend/            SpringBoot 后端
     interceptor/    用户 JWT 拦截器 + 管理员 JWT 拦截器
     util/           JwtUtil、ThreadLocal 上下文
   src/main/resources/
-    application.yml 数据源、端口、JWT 密钥、上传路径
-    sql/init.sql    建库建表 + seed(默认管理员 admin/admin123、示例数据)
+    application.yml 数据源、端口、JWT 密钥、上传路径（密钥/口令经环境变量注入，仓库不存真实值）
+    sql/init.sql    建库建表 + seed(示例数据；默认管理员由 AdminInitializer 启动时创建)
 frontend/           Vue3 前端
   src/api/          axios 实例 + 模块接口
   src/router/       前台 + /admin 路由 + 守卫
@@ -44,19 +44,23 @@ frontend/           Vue3 前端
 # 1. 初始化数据库
 mysql -u root -p < backend/src/main/resources/sql/init.sql
 
-# 2. 启动后端（:8080）
-cd backend && mvn spring-boot:run
+# 2. 启动后端（:8080）—— 先注入环境变量（密钥/口令不在仓库里）
+cd backend
+export JWT_SECRET="$(openssl rand -base64 48)"   # JWT 密钥，至少 32 字节，随机生成
+export DB_USERNAME=root DB_PASSWORD=123456       # 本机 MySQL 实际口令
+mvn spring-boot:run
 
 # 3. 启动前端（:5173，dev proxy 转发 /api 与 /uploads → :8080）
 cd frontend && npm install && npm run dev
 ```
-- 默认管理员：`admin` / `admin123`（seed 在 init.sql）。
-- Vite dev proxy 已在 `frontend/vite.config.ts` 配置，开发期无需处理跨域（后端仍配了 CORS 兜底）。
+- 默认管理员：首次启动由 `AdminInitializer` 自动创建 `admin`，密码来自 `ADMIN_INIT_PASSWORD`，未配置则生成随机密码并打印到后端日志。
+- 环境变量参考 `backend/.env.example`（已被 `.gitignore` 忽略）。
+- Vite dev proxy 已在 `frontend/vite.config.ts` 配置，开发期无需处理跨域（后端仍配了 CORS 兜底，白名单见 `app.cors.allowed-origins`）。
 
 ## 核心约定
 - **统一返回体** `R<T>{ code, message, data }`，`code=0` 表示成功；所有接口一律返回 `R`。
 - **分层**：`controller → service → mapper`，DTO 与实体分离，不直接暴露实体。
-- **鉴权**：两套独立 JWT——用户拦截 `/api/**`（放行 `/api/auth/**`、`/api/products/**`、`/api/categories`），管理员拦截 `/api/admin/**`（放行 `/api/admin/login`）。密钥在 `application.yml`。
+- **鉴权**：两套独立 JWT——用户拦截 `/api/**`（放行 `/api/auth/**`、`/api/products/**`、`/api/categories`），管理员拦截 `/api/admin/**`（放行 `/api/admin/login`）。密钥由环境变量 `JWT_SECRET` 注入（不在 `application.yml` 存真实值）。
 - **两个 Token**：用户 `token` 与管理员 `admin_token` 分开存 localStorage，前端两套 axios 实例分离。
 - **会员等级**：`1 普通 / 2 黄金 / 3 铂金 / 4 钻石`，默认 1；支付成功时按 `total_spent`（累计消费）阈值 10000/50000/100000 自动升级，只升不降。
 - **订单状态**：`UNPAID → PAID → SHIPPED → COMPLETED`，`UNPAID → CANCELLED`。

@@ -157,9 +157,8 @@ CREATE TABLE `order_item` (
 -- 默认数据（seed）
 -- =============================================================
 
--- 默认管理员：admin / admin123
-INSERT INTO `admin` (`username`, `password`, `name`, `status`) VALUES
-('admin', '$2a$10$wDD7ea63PkGhVaZ.rQzaaOeyX6nhxnwT4/Kl7Zg/3BMXmfk2cbCqq', '超级管理员', 1);
+-- 注意：默认管理员不再在此脚本中写死，由后端启动时自动创建
+-- （见 com.minimall.config.AdminInitializer，密码来自环境变量 ADMIN_INIT_PASSWORD 或自动生成）
 
 -- 商品分类（1级 + 2级）
 INSERT INTO `category` (`id`, `name`, `parent_id`, `sort`, `status`) VALUES
