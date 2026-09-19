@@ -6,7 +6,7 @@ const route = useRoute()
 const router = useRouter()
 const adminStore = useAdminStore()
 
-const activeMenu = () => route.name as string
+const activeMenu = () => route.path
 
 function onLogout() {
   adminStore.logout()
@@ -19,9 +19,9 @@ function onLogout() {
     <el-aside width="200px" class="aside">
       <div class="brand">Mini Mall 后台</div>
       <el-menu :default-active="activeMenu()" router>
-        <el-menu-item index="admin-products">商品管理</el-menu-item>
-        <el-menu-item index="admin-categories">分类管理</el-menu-item>
-        <el-menu-item index="admin-orders">订单管理</el-menu-item>
+        <el-menu-item index="/admin/products">商品管理</el-menu-item>
+        <el-menu-item index="/admin/categories">分类管理</el-menu-item>
+        <el-menu-item index="/admin/orders">订单管理</el-menu-item>
       </el-menu>
     </el-aside>
     <el-container>
