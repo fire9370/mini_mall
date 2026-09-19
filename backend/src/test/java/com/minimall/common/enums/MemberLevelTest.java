@@ -59,4 +59,16 @@ class MemberLevelTest {
     void nullIsNormal() {
         assertEquals(MemberLevel.NORMAL, MemberLevel.levelForTotalSpent(null));
     }
+
+    @Test
+    @DisplayName("fromCode(2) 返回黄金")
+    void fromCodeReturnsGold() {
+        assertEquals(MemberLevel.GOLD, MemberLevel.fromCode(2));
+    }
+
+    @Test
+    @DisplayName("fromCode(null) 回退普通")
+    void fromCodeNullReturnsNormal() {
+        assertEquals(MemberLevel.NORMAL, MemberLevel.fromCode(null));
+    }
 }

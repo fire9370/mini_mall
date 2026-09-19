@@ -40,4 +40,19 @@ public enum MemberLevel {
         }
         return result;
     }
+
+    /**
+     * 根据 code 获取枚举，未知值回退为普通会员
+     */
+    public static MemberLevel fromCode(Integer code) {
+        if (code == null) {
+            return NORMAL;
+        }
+        for (MemberLevel level : values()) {
+            if (level.code == code) {
+                return level;
+            }
+        }
+        return NORMAL;
+    }
 }
