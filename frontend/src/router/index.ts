@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { USER_TOKEN_KEY } from '@/api/http'
+import { ADMIN_TOKEN_KEY, USER_TOKEN_KEY } from '@/api/http'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,14 +18,33 @@ const router = createRouter({
         { path: 'order/:id', name: 'order-detail', component: () => import('@/views/OrderDetailView.vue'), meta: { requiresAuth: true } },
         { path: 'profile', name: 'profile', component: () => import('@/views/ProfileView.vue'), meta: { requiresAuth: true } }
       ]
+    },
+    {
+      path: '/admin/login',
+      name: 'admin-login',
+      component: () => import('@/admin/AdminLoginView.vue')
+    },
+    {
+      path: '/admin',
+      component: () => import('@/layouts/AdminLayout.vue'),
+      meta: { requiresAdmin: true },
+      children: [
+        { path: '', redirect: { name: 'admin-products' } },
+        { path: 'products', name: 'admin-products', component: () => import('@/admin/ProductManageView.vue') },
+        { path: 'categories', name: 'admin-categories', component: () => import('@/admin/CategoryManageView.vue') },
+        { path: 'orders', name: 'admin-orders', component: () => import('@/admin/OrderManageView.vue') }
+      ]
     }
   ]
 })
 
-// 全局路由守卫：需要登录的页面未登录则跳登录
+// 全局路由守卫
 router.beforeEach((to) => {
   if (to.meta.requiresAuth && !localStorage.getItem(USER_TOKEN_KEY)) {
     return { name: 'login', query: { redirect: to.fullPath } }
+  }
+  if (to.meta.requiresAdmin && !localStorage.getItem(ADMIN_TOKEN_KEY)) {
+    return { name: 'admin-login' }
   }
 })
 
